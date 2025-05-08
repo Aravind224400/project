@@ -11,7 +11,7 @@ import os
 # ----------------------------
 @st.cache_resource
 def load_or_train_model():
-    model_path = "mnist_cnn_model_v3.h5"
+    model_path = "mnist.hdf5"
     if os.path.exists(model_path):
         return tf.keras.models.load_model(model_path)
 
