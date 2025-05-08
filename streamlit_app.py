@@ -96,29 +96,34 @@ with tab1:
 
 # Draw digit tab
 with tab2:
-    st.write("Draw a digit below (white background, black digit):")
-    canvas_result = st_canvas(
-        fill_color="white",
-        stroke_width=15,
-        stroke_color="black",
-        background_color="white",
-        height=280,
-        width=280,
-        drawing_mode="freedraw",
-        key="canvas",
-    )
+ from PIL import Image
+import numpy as np
+from streamlit_drawable_canvas import st_canvas
 
-    if canvas_result.image_data is not None:
-        drawn_image = Image.fromarray((255 - canvas_result.image_data[:, :, 0]).astype("uint8"))
-        st.image(drawn_image.resize((100, 100)), caption="Your Drawing", use_column_width=False)
+st.write("Draw a digit below (white background, black digit):")
 
-        if st.button("Predict Drawn Digit"):
-            digit, confidence = predict_digit(drawn_image)
+canvas_result = st_canvas(
+    fill_color="white",
+    stroke_width=15,
+    stroke_color="black",
+    background_color="white",
+    height=280,
+    width=280,
+    drawing_mode="freedraw",
+    key="canvas"
+)
 
-            if confidence < 60:
-                st.warning(f"⚠️ Low confidence: {confidence:.2f}%. Try redrawing.")
-            else:
-                st.success(f"✅ Predicted Digit: **{digit}** (Confidence: {confidence:.2f}%)")
+if canvas_result.image_data is not None:
+    drawn_image = Image.fromarray((255 - canvas_result.image_data[:, :, 0]).astype(np.uint8))
+    st.image(drawn_image.resize((100, 100)), caption="Your Drawing", use_column_width=False)
+
+    if st.button("Predict Drawn Digit"):
+        digit, confidence = predict_digit(drawn_image)
+
+        if confidence < 60:
+            st.warning(f"⚠️ Low confidence: {confidence:.2f}%. Try redrawing.")
+        else:
+            st.success(f"✅ Predicted Digit: **{digit}** (Confidence: {confidence:.2f}%)")
 
 st.markdown("---")
 st.markdown("🔍 **Tip:** Draw large, centered digits or upload a clear image. The model expects digits similar in style to MNIST.")
