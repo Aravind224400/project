@@ -1,176 +1,123 @@
-{
-  "nbformat": 4,
-  "nbformat_minor": 0,
-  "metadata": {
-    "colab": {
-      "name": "mnist_streamlit.ipynb",
-      "provenance": [],
-      "mount_file_id": "1ca8IKDoz1gP1yoL2g1IbJLLbEFShMiWL",
-      "authorship_tag": "ABX9TyPUxHOgFyUmi87QKYlvmoz/",
-      "include_colab_link": true
-    },
-    "kernelspec": {
-      "name": "python3",
-      "display_name": "Python 3"
-    },
-    "language_info": {
-      "name": "python"
-    }
-  },
-  "cells": [
-    {
-      "cell_type": "markdown",
-      "metadata": {
-        "id": "view-in-github",
-        "colab_type": "text"
-      },
-      "source": [
-        "<a href=\"https://colab.research.google.com/github/bhupendrak9917/My-AI-Projects/blob/main/MNIST_Streamlit/mnist_streamlit.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "metadata": {
-        "id": "z9gDlju6bxch",
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "outputId": "451e5a6c-c956-46ff-8bb0-047341c2245f"
-      },
-      "source": [
-        "!pip install streamlit --quiet\n",
-        "!pip install pyngrok==4.1.1 --quiet\n",
-        "!pip install streamlit-drawable-canvas --quiet\n",
-        "from pyngrok import ngrok"
-      ],
-      "execution_count": null,
-      "outputs": [
-        {
-          "output_type": "stream",
-          "text": [
-            "\u001b[K     |████████████████████████████████| 8.2MB 4.0MB/s \n",
-            "\u001b[K     |████████████████████████████████| 174kB 38.7MB/s \n",
-            "\u001b[K     |████████████████████████████████| 81kB 9.4MB/s \n",
-            "\u001b[K     |████████████████████████████████| 4.2MB 27.2MB/s \n",
-            "\u001b[K     |████████████████████████████████| 112kB 47.5MB/s \n",
-            "\u001b[K     |████████████████████████████████| 71kB 8.9MB/s \n",
-            "\u001b[K     |████████████████████████████████| 122kB 60.1MB/s \n",
-            "\u001b[?25h  Building wheel for blinker (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
-            "\u001b[31mERROR: google-colab 1.0.0 has requirement ipykernel~=4.10, but you'll have ipykernel 5.5.5 which is incompatible.\u001b[0m\n",
-            "  Building wheel for pyngrok (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
-            "\u001b[K     |████████████████████████████████| 1.3MB 3.9MB/s \n",
-            "\u001b[?25h"
-          ],
-          "name": "stdout"
-        }
-      ]
-    },
-    {
-      "cell_type": "code",
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "id": "MHrVpXOdhBbM",
-        "outputId": "c28eae83-a04f-4235-9a5b-f8e194959b43"
-      },
-      "source": [
-        "%%writefile app.py\n",
-        "import streamlit as st\n",
-        "from streamlit_drawable_canvas import st_canvas\n",
-        "from tensorflow import keras\n",
-        "import cv2\n",
-        "import numpy as np\n",
-        "model_new = keras.models.load_model('/content/drive/MyDrive/Minor Project <Bhupendra Kumar>/mnist.hdf5')\n",
-        "\n",
-        "st.title(\"MNIST Digit Recognizer\")\n",
-        "\n",
-        "SIZE = 192\n",
-        "\n",
-        "canvas_result = st_canvas(\n",
-        "    fill_color=\"#ffffff\",\n",
-        "    stroke_width=10,\n",
-        "    stroke_color='#ffffff',\n",
-        "    background_color=\"#000000\",\n",
-        "    height=150,width=150,\n",
-        "    drawing_mode='freedraw',\n",
-        "    key=\"canvas\",\n",
-        ")\n",
-        "\n",
-        "if canvas_result.image_data is not None:\n",
-        "    img = cv2.resize(canvas_result.image_data.astype('uint8'), (28, 28))\n",
-        "    img_rescaling = cv2.resize(img, (SIZE, SIZE), interpolation=cv2.INTER_NEAREST)\n",
-        "    st.write('Input Image')\n",
-        "    st.image(img_rescaling)\n",
-        "\n",
-        "if st.button('Predict'):\n",
-        "    test_x = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n",
-        "    pred = model_new.predict(test_x.reshape(1, 28, 28, 1))\n",
-        "    st.write(f'result: {np.argmax(pred[0])}')\n",
-        "    st.bar_chart(pred[0])\n"
-      ],
-      "execution_count": null,
-      "outputs": [
-        {
-          "output_type": "stream",
-          "text": [
-            "Writing app.py\n"
-          ],
-          "name": "stdout"
-        }
-      ]
-    },
-    {
-      "cell_type": "code",
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/",
-          "height": 52
-        },
-        "id": "v8nQqxZ-l5Dc",
-        "outputId": "99a29bef-9053-4913-8600-eb73768450e7"
-      },
-      "source": [
-        "!nohup streamlit run app.py &\n",
-        "url = ngrok.connect(port='8501')\n",
-        "url"
-      ],
-      "execution_count": null,
-      "outputs": [
-        {
-          "output_type": "stream",
-          "text": [
-            "nohup: appending output to 'nohup.out'\n"
-          ],
-          "name": "stdout"
-        },
-        {
-          "output_type": "execute_result",
-          "data": {
-            "application/vnd.google.colaboratory.intrinsic+json": {
-              "type": "string"
-            },
-            "text/plain": [
-              "'http://2ab00b5f1a5e.ngrok.io'"
-            ]
-          },
-          "metadata": {
-            "tags": []
-          },
-          "execution_count": 3
-        }
-      ]
-    },
-    {
-      "cell_type": "code",
-      "metadata": {
-        "id": "xB-aBq0Tl9Ct"
-      },
-      "source": [
-        ""
-      ],
-      "execution_count": null,
-      "outputs": []
-    }
-  ]
-}
+import streamlit as st
+from streamlit_drawable_canvas import st_canvas
+from PIL import Image, ImageOps
+import numpy as np
+import tensorflow as tf
+import cv2
+import os
+
+# ----------------------------
+# Load or Train CNN Model
+# ----------------------------
+@st.cache_resource
+def load_or_train_model():
+    model_path = "mnist_cnn_model_v3.h5"
+    if os.path.exists(model_path):
+        return tf.keras.models.load_model(model_path)
+
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+    x_train, x_test = x_train / 255.0, x_test / 255.0
+    x_train = x_train.reshape(-1, 28, 28, 1)
+    x_test = x_test.reshape(-1, 28, 28, 1)
+
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPooling2D(2, 2),
+
+        tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPooling2D(2, 2),
+
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dropout(0.3),
+        tf.keras.layers.Dense(10, activation='softmax')
+    ])
+
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
+    model.save(model_path)
+    return model
+
+model = load_or_train_model()
+
+# ----------------------------
+# Prediction Function
+# ----------------------------
+def predict_digit_from_pil(image):
+    image = image.convert("L")
+    image = ImageOps.invert(image)
+    image = ImageOps.fit(image, (28, 28), Image.ANTIALIAS)
+    image_array = np.array(image) / 255.0
+    prediction = model.predict(image_array.reshape(1, 28, 28, 1))
+    return int(np.argmax(prediction)), float(np.max(prediction)) * 100
+
+def predict_digit_from_cv2(image_data):
+    img = cv2.resize(image_data.astype('uint8'), (28, 28))
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
+    gray = gray / 255.0
+    prediction = model.predict(gray.reshape(1, 28, 28, 1))
+    return int(np.argmax(prediction)), float(np.max(prediction)) * 100
+
+# ----------------------------
+# Streamlit UI
+# ----------------------------
+st.set_page_config(page_title="Digit Recognizer", layout="centered")
+st.title("🧠 Handwritten ✍🏻 Digit Recognizer")
+
+st.sidebar.header("ℹ️ About")
+st.sidebar.markdown("Recognize handwritten digits using a CNN trained on MNIST. Upload or draw a digit below.")
+
+st.markdown("### 📥 Upload or ✏️ Draw a Digit")
+tab1, tab2 = st.tabs(["Upload Image", "Draw Digit"])
+
+# -------------
+# Upload Tab
+# -------------
+with tab1:
+    uploaded_file = st.file_uploader("Upload an image of a digit (0-9)", type=["png", "jpg", "jpeg"])
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=False)
+        digit, confidence = predict_digit_from_pil(image)
+        if confidence < 60:
+            st.warning(f"⚠️ Low confidence: {confidence:.2f}%. Try a clearer image.")
+        else:
+            st.success(f"✅ Predicted Digit: **{digit}** (Confidence: {confidence:.2f}%)")
+
+# -------------
+# Draw Tab
+# -------------
+with tab2:
+    st.markdown("### ✏️ Draw a Digit (white on black):")
+
+    canvas_result = st_canvas(
+        fill_color="#ffffff",
+        stroke_width=10,
+        stroke_color="#ffffff",
+        background_color="#000000",
+        height=150,
+        width=150,
+        drawing_mode='freedraw',
+        key="canvas2",
+    )
+
+    if canvas_result.image_data is not None:
+        drawn_img = canvas_result.image_data
+        img_resized = cv2.resize(drawn_img.astype('uint8'), (192, 192))
+        st.image(img_resized, caption="Your Drawing", use_column_width=False)
+
+        if st.button("Predict Drawn Digit"):
+            digit, confidence = predict_digit_from_cv2(drawn_img)
+            if confidence < 60:
+                st.warning(f"⚠️ Low confidence: {confidence:.2f}%. Try redrawing.")
+            else:
+                st.success(f"✅ Predicted Digit: **{digit}** (Confidence: {confidence:.2f}%)")
+                st.bar_chart(model.predict(np.expand_dims(cv2.cvtColor(cv2.resize(drawn_img.astype('uint8'), (28, 28)), cv2.COLOR_RGB2GRAY) / 255.0, axis=(0, -1)))[0])
+
+st.markdown("---")
+st.markdown("🔍 **Tip:** Draw large, centered digits or upload clear images similar to MNIST style.")
