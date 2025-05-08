@@ -62,7 +62,6 @@ def predict_digit(image):
 # ----------------------------
 # Streamlit UI
 # ----------------------------
-st.set_page_config(page_title="Digit Recognizer", layout="wide", initial_sidebar_state="expanded")
 st.title("Handwritten Digit Recognizer")
 
 st.sidebar.header("About")
