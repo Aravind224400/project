@@ -1,10 +1,9 @@
 import streamlit as st
-from streamlit_drawable_canvas import st_canvas
 from PIL import Image, ImageOps
 import numpy as np
 import tensorflow as tf
-import cv2
 import os
+from streamlit_drawable_canvas import st_canvas
 
 # ----------------------------
 # Load or Train CNN Model
@@ -24,11 +23,9 @@ def load_or_train_model():
         tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPooling2D(2, 2),
-
         tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPooling2D(2, 2),
-
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(0.3),
@@ -46,78 +43,91 @@ def load_or_train_model():
 model = load_or_train_model()
 
 # ----------------------------
-# Prediction Function
+# Image Preprocessing
 # ----------------------------
-def predict_digit_from_pil(image):
+def preprocess_image(image):
     image = image.convert("L")
     image = ImageOps.invert(image)
     image = ImageOps.fit(image, (28, 28), Image.ANTIALIAS)
     image_array = np.array(image) / 255.0
-    prediction = model.predict(image_array.reshape(1, 28, 28, 1))
-    return int(np.argmax(prediction)), float(np.max(prediction)) * 100
+    return image_array.reshape(1, 28, 28, 1)
 
-def predict_digit_from_cv2(image_data):
-    img = cv2.resize(image_data.astype('uint8'), (28, 28))
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
-    gray = gray / 255.0
-    prediction = model.predict(gray.reshape(1, 28, 28, 1))
-    return int(np.argmax(prediction)), float(np.max(prediction)) * 100
+# ----------------------------
+# Predict Digit
+# ----------------------------
+def predict_digit(image):
+    image_array = preprocess_image(image)
+    prediction = model.predict(image_array)
+    digit = int(np.argmax(prediction))
+    confidence = float(np.max(prediction)) * 100
+    return digit, confidence, prediction[0]
 
 # ----------------------------
 # Streamlit UI
 # ----------------------------
-st.set_page_config(page_title="Digit Recognizer", layout="centered")
-st.title("🧠 Handwritten ✍🏻 Digit Recognizer")
+st.set_page_config(page_title="MNIST Digit Recognizer", layout="centered")
+st.title("🧠 MNIST Handwritten Digit Recognizer")
 
-st.sidebar.header("ℹ️ About")
-st.sidebar.markdown("Recognize handwritten digits using a CNN trained on MNIST. Upload or draw a digit below.")
+st.markdown("""
+<style>
+    .stTabs [data-baseweb="tab"] {
+        background-color: #f0f2f6;
+        border-radius: 5px 5px 0 0;
+        padding: 10px 20px;
+        margin-right: 5px;
+        font-weight: 600;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-st.markdown("### 📥 Upload or ✏️ Draw a Digit")
-tab1, tab2 = st.tabs(["Upload Image", "Draw Digit"])
+st.sidebar.header("ℹ️ Instructions")
+st.sidebar.markdown("""
+- Draw or upload a digit (0–9)
+- Use **white background** and **black digit**
+- Larger, centered digits work best
+""")
 
-# -------------
+tab1, tab2 = st.tabs(["📤 Upload Image", "✏️ Draw Digit"])
+
 # Upload Tab
-# -------------
 with tab1:
-    uploaded_file = st.file_uploader("Upload an image of a digit (0-9)", type=["png", "jpg", "jpeg"])
-    if uploaded_file is not None:
+    uploaded_file = st.file_uploader("Upload a digit image", type=["png", "jpg", "jpeg"])
+    if uploaded_file:
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=False)
-        digit, confidence = predict_digit_from_pil(image)
-        if confidence < 60:
-            st.warning(f"⚠️ Low confidence: {confidence:.2f}%. Try a clearer image.")
-        else:
-            st.success(f"✅ Predicted Digit: **{digit}** (Confidence: {confidence:.2f}%)")
+        st.image(image, caption="Uploaded Image", width=150)
 
-# -------------
+        digit, confidence, probs = predict_digit(image)
+
+        st.markdown(f"### ✅ Predicted: `{digit}`")
+        st.progress(confidence / 100)
+        st.caption(f"Confidence: {confidence:.2f}%")
+        st.bar_chart(probs)
+
 # Draw Tab
-# -------------
 with tab2:
-    st.markdown("### ✏️ Draw a Digit (white on black):")
-
+    st.write("Draw a digit below (white canvas, black digit):")
     canvas_result = st_canvas(
-        fill_color="#ffffff",
-        stroke_width=10,
-        stroke_color="#ffffff",
-        background_color="#000000",
-        height=150,
-        width=150,
-        drawing_mode='freedraw',
-        key="canvas2",
+        fill_color="white",
+        stroke_width=15,
+        stroke_color="black",
+        background_color="white",
+        height=280,
+        width=280,
+        drawing_mode="freedraw",
+        key="canvas"
     )
 
     if canvas_result.image_data is not None:
-        drawn_img = canvas_result.image_data
-        img_resized = cv2.resize(drawn_img.astype('uint8'), (192, 192))
-        st.image(img_resized, caption="Your Drawing", use_column_width=False)
+        drawn_image = Image.fromarray((255 - canvas_result.image_data[:, :, 0]).astype(np.uint8))
+        st.image(drawn_image.resize((100, 100)), caption="Your Drawing", width=100)
 
-        if st.button("Predict Drawn Digit"):
-            digit, confidence = predict_digit_from_cv2(drawn_img)
-            if confidence < 60:
-                st.warning(f"⚠️ Low confidence: {confidence:.2f}%. Try redrawing.")
-            else:
-                st.success(f"✅ Predicted Digit: **{digit}** (Confidence: {confidence:.2f}%)")
-                st.bar_chart(model.predict(np.expand_dims(cv2.cvtColor(cv2.resize(drawn_img.astype('uint8'), (28, 28)), cv2.COLOR_RGB2GRAY) / 255.0, axis=(0, -1)))[0])
+        if st.button("🔍 Predict"):
+            digit, confidence, probs = predict_digit(drawn_image)
+
+            st.markdown(f"### ✅ Predicted: `{digit}`")
+            st.progress(confidence / 100)
+            st.caption(f"Confidence: {confidence:.2f}%")
+            st.bar_chart(probs)
 
 st.markdown("---")
-st.markdown("🔍 **Tip:** Draw large, centered digits or upload clear images similar to MNIST style.")
+st.info("Tip: Draw clearly and center your digit. The model mimics the MNIST dataset.")
