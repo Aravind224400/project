@@ -1,22 +1,21 @@
 import streamlit as st
-# MUST BE FIRST Streamlit command
 st.set_page_config(page_title="MNIST Digit Recognizer", layout="centered")
+
+# Other imports
 from PIL import Image, ImageOps
 import numpy as np
 import tensorflow as tf
 import os
 from streamlit_drawable_canvas import st_canvas
 
+# Load model
 @st.cache_resource
 def load_model():
-    model_path = "mnist_cnn_model_v2.h5"
-    if os.path.exists(model_path):
-        return tf.keras.models.load_model(model_path)
-    else:
-        st.error("Model file not found!")
-        return None
+    return tf.keras.models.load_model("mnist_cnn_model_v2.h5")
 
 model = load_model()
+
+# (Then your preprocess, predict_digit, UI code...)
 
 def preprocess_image(image):
     image = image.convert("L")
