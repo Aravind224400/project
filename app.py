@@ -1,63 +1,84 @@
 import streamlit as st
-import numpy as np
-from tensorflow.keras.models import load_model
-from PIL import Image, ImageOps
 from streamlit_drawable_canvas import st_canvas
+from PIL import Image, ImageOps
+import numpy as np
+import tensorflow as tf
 
-# 1. Set page config (must be first!)
-st.set_page_config(page_title="MNIST Digit Recognizer", layout="centered")
+# Page configuration
+st.set_page_config(page_title="Handwritten Digit Recognizer", layout="centered")
 
-# 2. Load model
-model = load_model("mnist_cnn_model_v2.h5")
+# Load the trained model
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model("mnist_cnn_model_v2.h5")
 
-# 3. Title
-st.title("MNIST Digit Recognizer")
+model = load_model()
 
-# 4. Tabs for drawing and upload
-tab1, tab2 = st.tabs(["Draw Digit", "Upload Image"])
+# Title
+st.title("Handwritten Digit Recognizer")
+st.markdown("Draw a digit or upload an image (0–9) and click **Predict**.")
 
-# -------- TAB 1: DRAWING -------- #
+# Tabs: Draw | Upload
+tab1, tab2 = st.tabs(["✏️ Draw Digit", "📤 Upload Image"])
+
+# ------------------------
+# Image Preprocessing
+# ------------------------
+def preprocess_image(image):
+    image = image.convert("L")                  # Convert to grayscale
+    image = ImageOps.invert(image)              # Invert (white digit on black)
+    image = ImageOps.autocontrast(image)        # Enhance contrast
+    image = image.resize((28, 28))              # Resize to 28x28
+    image_array = np.array(image) / 255.0       # Normalize
+    return image_array.reshape(1, 28, 28, 1)     # Reshape for model
+
+# ------------------------
+# Prediction Function
+# ------------------------
+def predict_digit(image):
+    processed = preprocess_image(image)
+    prediction = model.predict(processed)
+    predicted_class = int(np.argmax(prediction))
+    confidence = float(np.max(prediction)) * 100
+    return predicted_class, confidence, prediction[0]
+
+# ------------------------
+# Draw Tab
+# ------------------------
 with tab1:
-    st.subheader("Draw a digit (0-9)")
     canvas_result = st_canvas(
         fill_color="#000000",
-        stroke_width=12,
+        stroke_width=20,
         stroke_color="#FFFFFF",
         background_color="#000000",
-        width=192,
-        height=192,
+        width=280,
+        height=280,
         drawing_mode="freedraw",
-        key="canvas",
+        key="canvas_draw"
     )
 
     if st.button("Predict from Drawing"):
         if canvas_result.image_data is not None:
-            img = canvas_result.image_data
-            img = Image.fromarray(np.uint8(img)).convert("L")
-            img = img.resize((28, 28))
-            img = ImageOps.invert(img)
-            img_array = np.array(img) / 255.0
-            img_array = img_array.reshape(1, 28, 28, 1)
+            image = Image.fromarray(np.uint8(canvas_result.image_data)).convert("RGB")
+            digit, confidence, probs = predict_digit(image)
+            st.success(f"Predicted Digit: **{digit}**")
+            st.caption(f"Confidence: {confidence:.2f}%")
+            st.bar_chart(probs)
+        else:
+            st.warning("Please draw a digit before clicking Predict.")
 
-            prediction = model.predict(img_array)
-            predicted_class = np.argmax(prediction)
-            st.success(f"Predicted Digit: **{predicted_class}**")
-
-# -------- TAB 2: UPLOAD -------- #
+# ------------------------
+# Upload Tab
+# ------------------------
 with tab2:
-    st.subheader("Upload a digit image (28x28 grayscale or will be resized)")
+    uploaded_file = st.file_uploader("Upload an image of a digit", type=["png", "jpg", "jpeg"])
 
-    uploaded_file = st.file_uploader("Choose an image...", type=["png", "jpg", "jpeg"])
     if uploaded_file is not None:
-        image = Image.open(uploaded_file).convert("L")
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        image = Image.open(uploaded_file).convert("RGB")
+        st.image(image, caption="Uploaded Image", width=150)
 
         if st.button("Predict from Upload"):
-            img = image.resize((28, 28))
-            img = ImageOps.invert(img)
-            img_array = np.array(img) / 255.0
-            img_array = img_array.reshape(1, 28, 28, 1)
-
-            prediction = model.predict(img_array)
-            predicted_class = np.argmax(prediction)
-            st.success(f"Predicted Digit: **{predicted_class}**")
+            digit, confidence, probs = predict_digit(image)
+            st.success(f"Predicted Digit: **{digit}**")
+            st.caption(f"Confidence: {confidence:.2f}%")
+            st.bar_chart(probs)
