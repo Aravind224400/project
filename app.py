@@ -4,47 +4,55 @@ from PIL import Image, ImageOps
 import numpy as np
 import tensorflow as tf
 
-# Page configuration
+# ---------------------------
+# Page Configuration
+# ---------------------------
 st.set_page_config(page_title="Handwritten Digit Recognizer", layout="centered")
 
+# ---------------------------
 # Load the trained model
+# ---------------------------
 @st.cache_resource
 def load_model():
     return tf.keras.models.load_model("mnist_cnn_model_v2.h5")
 
 model = load_model()
 
-# Title
-st.title("Handwritten Digit Recognizer")
-st.markdown("Draw a digit or upload an image (0–9) and click **Predict**.")
-
-# Tabs: Draw | Upload
-tab1, tab2 = st.tabs(["✏️ Draw Digit", "📤 Upload Image"])
-
-# ------------------------
-# Image Preprocessing
-# ------------------------
+# ---------------------------
+# Preprocess Image
+# ---------------------------
 def preprocess_image(image):
-    image = image.convert("L")                  # Convert to grayscale
-    image = ImageOps.invert(image)              # Invert (white digit on black)
-    image = ImageOps.autocontrast(image)        # Enhance contrast
-    image = image.resize((28, 28))              # Resize to 28x28
-    image_array = np.array(image) / 255.0       # Normalize
-    return image_array.reshape(1, 28, 28, 1)     # Reshape for model
+    image = image.convert("L")
+    image = ImageOps.invert(image)
+    image = ImageOps.autocontrast(image)
+    image = image.resize((28, 28))
+    image_array = np.array(image) / 255.0
+    return image_array.reshape(1, 28, 28, 1)
 
-# ------------------------
-# Prediction Function
-# ------------------------
+# ---------------------------
+# Predict Digit
+# ---------------------------
 def predict_digit(image):
     processed = preprocess_image(image)
     prediction = model.predict(processed)
-    predicted_class = int(np.argmax(prediction))
+    digit = int(np.argmax(prediction))
     confidence = float(np.max(prediction)) * 100
-    return predicted_class, confidence, prediction[0]
+    return digit, confidence, prediction[0]
 
-# ------------------------
-# Draw Tab
-# ------------------------
+# ---------------------------
+# Display Title
+# ---------------------------
+st.title("Handwritten Digit Recognizer")
+st.markdown("Draw or upload a digit image (0–9) and click **Predict**.")
+
+# ---------------------------
+# Tabs: Draw and Upload
+# ---------------------------
+tab1, tab2, tab3 = st.tabs(["✏️ Draw Digit", "📤 Upload Image", "📊 Model Accuracy"])
+
+# ---------------------------
+# Draw Digit Tab
+# ---------------------------
 with tab1:
     canvas_result = st_canvas(
         fill_color="#000000",
@@ -67,9 +75,9 @@ with tab1:
         else:
             st.warning("Please draw a digit before clicking Predict.")
 
-# ------------------------
-# Upload Tab
-# ------------------------
+# ---------------------------
+# Upload Image Tab
+# ---------------------------
 with tab2:
     uploaded_file = st.file_uploader("Upload an image of a digit", type=["png", "jpg", "jpeg"])
 
@@ -82,3 +90,15 @@ with tab2:
             st.success(f"Predicted Digit: **{digit}**")
             st.caption(f"Confidence: {confidence:.2f}%")
             st.bar_chart(probs)
+
+# ---------------------------
+# Accuracy Tab (using MNIST test set)
+# ---------------------------
+with tab3:
+    if st.button("Evaluate Model on MNIST Test Set"):
+        st.info("Evaluating... This may take a few seconds.")
+        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+        x_test = x_test / 255.0
+        x_test = x_test.reshape(-1, 28, 28, 1)
+        test_loss, test_acc = model.evaluate(x_test, y_test, verbose=0)
+        st.success(f"Model Accuracy on MNIST Test Set: **{test_acc * 100:.2f}%**")
