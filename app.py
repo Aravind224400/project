@@ -32,9 +32,6 @@ st.markdown("""
         font-size: 3em;
         text-align: center;
         font-weight: bold;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-        padding: 10px;
-        border-radius: 10px;
     }
 
     .celebrate {
