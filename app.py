@@ -4,10 +4,14 @@ import numpy as np
 import tensorflow as tf
 from streamlit_drawable_canvas import st_canvas
 
-# Set page configuration
+# Page config
 st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
-# Custom CSS for animations and background
+# Initialize score in session
+if 'score' not in st.session_state:
+    st.session_state.score = 0
+
+# Style with animation and gradient
 st.markdown("""
     <style>
     body {
@@ -51,24 +55,32 @@ def load_model():
 
 model = load_model()
 
-# Preprocessing function
+# Preprocessing
 def preprocess(image):
-    image = image.resize((28, 28)).convert('L')  # Grayscale and resize
+    image = image.resize((28, 28)).convert('L')
     image = ImageOps.invert(image)
     image = np.array(image) / 255.0
     image = image.reshape(1, 28, 28, 1)
     return image
 
-# Title with animated gradient
+# Header
 st.title("🧠 Handwritten Digit Recognizer")
 st.markdown("🎯 **Recognize digits (0–9) drawn or uploaded by you!**")
 
-# Input method selector
+# Scoreboard
+st.markdown(f"🏅 **Your Score:** `{st.session_state.score}`")
+
+# Input options
 option = st.radio("✍️ Choose input method:", ["🖌️ Draw Digit", "📁 Upload Image"])
 
+def reward_animation():
+    st.markdown('<div class="celebrate">🎉 Woohoo! Great job! 🎉</div>', unsafe_allow_html=True)
+    for _ in range(3):  # simulate "3 balloons" by repeating the GIF
+        st.image("https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif", width=200)
+
+# Drawing input
 if option == "🖌️ Draw Digit":
     st.markdown("🎨 **Draw a digit (0-9) below:**")
-
     canvas_result = st_canvas(
         fill_color="white",
         stroke_width=10,
@@ -88,16 +100,12 @@ if option == "🖌️ Draw Digit":
             predicted_digit = np.argmax(prediction)
 
             st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
-            st.balloons()
+            st.session_state.score += 1
+            reward_animation()
 
-            # Celebratory text
-            st.markdown('<div class="celebrate">🎉 Woohoo! Great job! 🎉</div>', unsafe_allow_html=True)
-
-            # Confetti GIF
-            st.image("https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif", width=250)
-
+# Upload input
 elif option == "📁 Upload Image":
-    uploaded_file = st.file_uploader("📤 Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
+    uploaded_file = st.file_uploader("📤 Upload an image of a digit", type=["png", "jpg", "jpeg"])
     
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
@@ -109,7 +117,4 @@ elif option == "📁 Upload Image":
             predicted_digit = np.argmax(prediction)
 
             st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
-            st.balloons()
-
-            st.markdown('<div class="celebrate">🎊 You nailed it! 🎊</div>', unsafe_allow_html=True)
-            st.image("https://media.giphy.com/media/xT0Gqz3vGq7LiknyGg/giphy.gif", width=250)
+            st.session
