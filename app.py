@@ -1,4 +1,6 @@
 import streamlit as st
+# MUST BE FIRST Streamlit command
+st.set_page_config(page_title="MNIST Digit Recognizer", layout="centered")
 from PIL import Image, ImageOps
 import numpy as np
 import tensorflow as tf
