@@ -7,7 +7,7 @@ from streamlit_drawable_canvas import st_canvas
 # Set page configuration
 st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
-# Colorful background CSS
+# Custom CSS for animations and background
 st.markdown("""
     <style>
     body {
@@ -18,11 +18,28 @@ st.markdown("""
         background-attachment: fixed;
         background-size: cover;
     }
-    h1, h2, h3 {
-        color: #222222;
+    h1 {
+        color: transparent;
+        background: linear-gradient(to right, #f12711, #f5af19);
+        -webkit-background-clip: text;
+        font-size: 3em;
+        animation: pulse 2s infinite;
+        text-align: center;
     }
-    .stRadio > label {
-        font-weight: bold;
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    .celebrate {
+        text-align: center;
+        font-size: 2em;
+        color: #ff4081;
+        animation: pop 0.6s ease-in-out;
+    }
+    @keyframes pop {
+        0% { transform: scale(0.5); opacity: 0; }
+        100% { transform: scale(1.2); opacity: 1; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -42,11 +59,11 @@ def preprocess(image):
     image = image.reshape(1, 28, 28, 1)
     return image
 
-# Title
+# Title with animated gradient
 st.title("🧠 Handwritten Digit Recognizer")
 st.markdown("🎯 **Recognize digits (0–9) drawn or uploaded by you!**")
 
-# Option to draw or upload
+# Input method selector
 option = st.radio("✍️ Choose input method:", ["🖌️ Draw Digit", "📁 Upload Image"])
 
 if option == "🖌️ Draw Digit":
@@ -71,7 +88,13 @@ if option == "🖌️ Draw Digit":
             predicted_digit = np.argmax(prediction)
 
             st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
-            st.balloons()  # 🎈 Reward animation
+            st.balloons()
+
+            # Celebratory text
+            st.markdown('<div class="celebrate">🎉 Woohoo! Great job! 🎉</div>', unsafe_allow_html=True)
+
+            # Confetti GIF
+            st.image("https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif", width=250)
 
 elif option == "📁 Upload Image":
     uploaded_file = st.file_uploader("📤 Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
@@ -86,4 +109,7 @@ elif option == "📁 Upload Image":
             predicted_digit = np.argmax(prediction)
 
             st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
-            st.balloons()  # 🎈 Reward animation
+            st.balloons()
+
+            st.markdown('<div class="celebrate">🎊 You nailed it! 🎊</div>', unsafe_allow_html=True)
+            st.image("https://media.giphy.com/media/xT0Gqz3vGq7LiknyGg/giphy.gif", width=250)
