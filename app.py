@@ -34,6 +34,20 @@ st.markdown("""
         font-weight: bold;
     }
 
+    .stButton>button {
+        color: white;  /* Make button text white */
+        background-color: rgba(0, 0, 0, 0.6);  /* Optional: darken button background */
+        border: none;
+    }
+
+    .stButton>button:hover {
+        background-color: rgba(0, 0, 0, 0.8);  /* Darken on hover */
+    }
+
+    .stMarkdown, .stText {
+        color: white;  /* Ensure all markdown and text elements are white */
+    }
+
     .celebrate {
         text-align: center;
         font-size: 2em;
