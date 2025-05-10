@@ -1,6 +1,6 @@
 import streamlit as st
 # This must be the FIRST Streamlit command
-st.set_page_config(page_title="MNIST Digit Recognizer", layout="centered")
+st.set_page_config(page_title="Hand Digit Recognizer", layout="centered")
 
 from PIL import Image, ImageOps
 import numpy as np
@@ -23,7 +23,7 @@ def preprocess(image):
     return image
 
 # Streamlit UI
-st.title("MNIST Digit Recognizer")
+st.title("Hand Digit Recognizer")
 st.markdown("Draw a digit (0-9) below:")
 
 canvas_result = st_canvas(
