@@ -5,13 +5,13 @@ from PIL import Image, ImageOps
 from streamlit_drawable_canvas import st_canvas
 
 # 1. Set page config (must be first!)
-st.set_page_config(page_title="Hand Digit Recognizer", layout="centered")
+st.set_page_config(page_title="MNIST Digit Recognizer", layout="centered")
 
 # 2. Load model
 model = load_model("mnist_cnn_model_v2.h5")
 
 # 3. Title
-st.title("Hand Digit Recognizer")
+st.title("MNIST Digit Recognizer")
 
 # 4. Tabs for drawing and upload
 tab1, tab2 = st.tabs(["Draw Digit", "Upload Image"])
