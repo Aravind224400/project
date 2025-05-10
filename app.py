@@ -32,8 +32,8 @@ st.markdown("""
         font-size: 3em;
         text-align: center;
         font-weight: bold;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.7); /* Stronger opacity for better visibility */
+        padding: 20px;
         border-radius: 10px;
     }
 
@@ -105,21 +105,4 @@ if option == "🖌️ Draw Digit":
 
     if st.button("🔍 Predict from Drawing"):
         if canvas_result.image_data is not None:
-            img = Image.fromarray((canvas_result.image_data[:, :, 0]).astype('uint8'))
-            processed = preprocess(img)
-            prediction = model.predict(processed)
-            predicted_digit = np.argmax(prediction)
-            reward_animation(predicted_digit)
-
-elif option == "📁 Upload Image":
-    uploaded_file = st.file_uploader("📤 Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
-    
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="🖼️ Uploaded Image", width=150)
-
-        if st.button("🔍 Predict from Upload"):
-            processed = preprocess(image)
-            prediction = model.predict(processed)
-            predicted_digit = np.argmax(prediction)
-            reward_animation(predicted_digit)
+            img = Image
