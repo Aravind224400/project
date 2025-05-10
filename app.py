@@ -27,7 +27,7 @@ st.markdown("""
         background: transparent; /* No overlay, background fully visible */
     }
 
-    h1, .stMarkdown, .stButton, .stRadio, .stSuccess, .stText, .stFileUploader, .stTextInput {
+    h1, .stMarkdown, .stButton, .stRadio, .stSuccess, .stText, .stFileUploader, .stTextInput, .stTextArea, .stMultiSelect {
         color: white !important;  /* Make all text white */
     }
 
@@ -38,6 +38,15 @@ st.markdown("""
         background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
         padding: 10px;
         border-radius: 10px;
+    }
+
+    .stButton, .stRadio, .stFileUploader, .stTextInput, .stTextArea, .stMultiSelect {
+        color: white !important;  /* Ensure buttons, file uploaders, etc., are also white */
+        border: 2px solid white;
+    }
+
+    .stRadio input[type=radio], .stButton, .stFileUploader input[type="file"] {
+        color: white !important;
     }
 
     .celebrate {
