@@ -7,20 +7,24 @@ from streamlit_drawable_canvas import st_canvas
 # Set page configuration
 st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
-# Custom CSS to set an aesthetic background image
+# Initialize score in session
+if 'score' not in st.session_state:
+    st.session_state.score = 0
+
+# Custom CSS to set the provided aesthetic background image
 st.markdown("""
     <style>
     body {
         margin: 0;
         padding: 0;
-        background-image: url('https://path-to-your-aesthetic-image.jpg');
+        background-image: url('https://png.pngtree.com/thumb_back/fw800/background/20190223/ourmid/pngtree-simple-and-intelligent-facial-recognition-advertising-background-backgroundintelligentadvancedlight-spottechnological-senseface-image_82888.jpg');
         background-size: cover;
         background-position: center center;
         background-attachment: fixed;
     }
 
     .stApp {
-        background: rgba(255, 255, 255, 0.8); /* Slight white overlay to make content stand out */
+        background: rgba(255, 255, 255, 0.7); /* Slight white overlay to make content stand out */
     }
 
     h1 {
