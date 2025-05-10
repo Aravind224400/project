@@ -6,49 +6,26 @@ import os
 from streamlit_drawable_canvas import st_canvas
 
 # ----------------------------
-# Load or Train CNN Model
+# Load Pretrained CNN Model
 # ----------------------------
 @st.cache_resource
-def load_or_train_model():
-    model_path = "mnist_cnn_model_v3.h5"
+def load_model():
+    model_path = "/mnt/data/mnist_cnn_model_v2.h5"
     if os.path.exists(model_path):
         return tf.keras.models.load_model(model_path)
+    else:
+        st.error("Model file not found!")
+        return None
 
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-    x_train, x_test = x_train / 255.0, x_test / 255.0
-    x_train = x_train.reshape(-1, 28, 28, 1)
-    x_test = x_test.reshape(-1, 28, 28, 1)
-
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPooling2D(2, 2),
-        tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPooling2D(2, 2),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dropout(0.3),
-        tf.keras.layers.Dense(10, activation='softmax')
-    ])
-
-    model.compile(optimizer='adam',
-                  loss='sparse_categorical_crossentropy',
-                  metrics=['accuracy'])
-
-    model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
-    model.save(model_path)
-    return model
-
-model = load_or_train_model()
+model = load_model()
 
 # ----------------------------
 # Image Preprocessing
 # ----------------------------
 def preprocess_image(image):
-    image = image.convert("L")
+    image = image.convert("L")  # Convert to grayscale
     image = ImageOps.invert(image)
-    image = ImageOps.fit(image, (28, 28), Image.ANTIALIAS)
+    image = ImageOps.fit(image, (28, 28), Image.Resampling.LANCZOS)
     image_array = np.array(image) / 255.0
     return image_array.reshape(1, 28, 28, 1)
 
@@ -92,7 +69,7 @@ tab1, tab2 = st.tabs(["📤 Upload Image", "✏️ Draw Digit"])
 # Upload Tab
 with tab1:
     uploaded_file = st.file_uploader("Upload a digit image", type=["png", "jpg", "jpeg"])
-    if uploaded_file:
+    if uploaded_file and model:
         image = Image.open(uploaded_file)
         st.image(image, caption="Uploaded Image", width=150)
 
@@ -121,7 +98,7 @@ with tab2:
         drawn_image = Image.fromarray((255 - canvas_result.image_data[:, :, 0]).astype(np.uint8))
         st.image(drawn_image.resize((100, 100)), caption="Your Drawing", width=100)
 
-        if st.button("🔍 Predict"):
+        if st.button("🔍 Predict") and model:
             digit, confidence, probs = predict_digit(drawn_image)
 
             st.markdown(f"### ✅ Predicted: `{digit}`")
