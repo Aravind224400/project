@@ -68,7 +68,10 @@ if option == "🖌️ Draw Digit":
             img = Image.fromarray((canvas_result.image_data[:, :, 0]).astype('uint8'))
             processed = preprocess(img)
             prediction = model.predict(processed)
-            st.success(f"✅ **Predicted Digit:** `{np.argmax(prediction)}` 🔢")
+            predicted_digit = np.argmax(prediction)
+
+            st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
+            st.balloons()  # 🎈 Reward animation
 
 elif option == "📁 Upload Image":
     uploaded_file = st.file_uploader("📤 Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
@@ -80,4 +83,7 @@ elif option == "📁 Upload Image":
         if st.button("🔍 Predict from Upload"):
             processed = preprocess(image)
             prediction = model.predict(processed)
-            st.success(f"✅ **Predicted Digit:** `{np.argmax(prediction)}` 🔢")
+            predicted_digit = np.argmax(prediction)
+
+            st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
+            st.balloons()  # 🎈 Reward animation
