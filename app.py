@@ -11,7 +11,7 @@ st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="cente
 if 'score' not in st.session_state:
     st.session_state.score = 0
 
-# Custom CSS to set the provided aesthetic background image with higher opacity (no overlay)
+# Custom CSS to set the provided aesthetic background image with pure white text
 st.markdown("""
     <style>
     body {
@@ -27,12 +27,15 @@ st.markdown("""
         background: transparent; /* No overlay, background fully visible */
     }
 
+    h1, .stMarkdown, .stButton, .stRadio, .stSuccess, .stText, .stFileUploader, .stTextInput {
+        color: white !important;  /* Make all text white */
+    }
+
     h1 {
-        color: white;  /* Making the title white */
         font-size: 3em;
         text-align: center;
         font-weight: bold;
-        background-color: rgba(0, 0, 0, 0.6); /* Stronger semi-transparent background */
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
         padding: 10px;
         border-radius: 10px;
     }
