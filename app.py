@@ -7,21 +7,20 @@ from streamlit_drawable_canvas import st_canvas
 # Set page configuration
 st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
-# Initialize score in session
-if 'score' not in st.session_state:
-    st.session_state.score = 0
-
-# Custom CSS for styles and static background
+# Custom CSS to set an aesthetic background image
 st.markdown("""
     <style>
     body {
         margin: 0;
         padding: 0;
+        background-image: url('https://path-to-your-aesthetic-image.jpg');
+        background-size: cover;
+        background-position: center center;
+        background-attachment: fixed;
     }
 
     .stApp {
-        background: linear-gradient(270deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #84fab0, #8fd3f4, #a6c1ee, #d4fc79);
-        background-size: cover;
+        background: rgba(255, 255, 255, 0.8); /* Slight white overlay to make content stand out */
     }
 
     h1 {
@@ -36,19 +35,12 @@ st.markdown("""
         text-align: center;
         font-size: 2em;
         color: #ff4081;
-        animation: pop 0.6s ease-in-out, colorChange 1.5s infinite;
+        animation: pop 0.6s ease-in-out;
     }
 
     @keyframes pop {
         0% { transform: scale(0.5); opacity: 0; }
-        50% { transform: scale(1.3); opacity: 1; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes colorChange {
-        0% { color: #ff4081; }
-        50% { color: #ffd700; }
-        100% { color: #ff4081; }
+        100% { transform: scale(1.2); opacity: 1; }
     }
     </style>
 """, unsafe_allow_html=True)
