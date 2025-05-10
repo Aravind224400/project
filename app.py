@@ -28,11 +28,10 @@ st.markdown("""
     }
 
     h1 {
-        color: transparent;
-        background: linear-gradient(to right, #f12711, #f5af19);
-        -webkit-background-clip: text;
+        color: white;  /* Making the title white */
         font-size: 3em;
         text-align: center;
+        font-weight: bold;
     }
 
     .celebrate {
