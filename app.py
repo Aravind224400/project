@@ -17,7 +17,7 @@ st.markdown("""
     body {
         margin: 0;
         padding: 0;
-        background-image: url('https://png.pngtree.com/thumb_back/fw800/background/20190223/ourmid/pngtree-simple-and-intelligent-facial-recognition-advertising-background-backgroundintelligentadvancedlight-spottechnological-senseface-image_82888.jpg');
+        background-image: url(https://wallpaperaccess.com/full/682191.jpg);
         background-size: cover;
         background-position: center center;
         background-attachment: fixed;
