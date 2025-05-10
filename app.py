@@ -7,6 +7,26 @@ from streamlit_drawable_canvas import st_canvas
 # Set page configuration
 st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
+# Colorful background CSS
+st.markdown("""
+    <style>
+    body {
+        background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    }
+    .stApp {
+        background-image: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
+        background-attachment: fixed;
+        background-size: cover;
+    }
+    h1, h2, h3 {
+        color: #222222;
+    }
+    .stRadio > label {
+        font-weight: bold;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Load model
 @st.cache_resource
 def load_model():
