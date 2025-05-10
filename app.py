@@ -3,13 +3,21 @@ from PIL import Image, ImageOps
 import numpy as np
 import tensorflow as tf
 from streamlit_drawable_canvas import st_canvas
+import time
+import os
+import pygame  # For sound effects
 
 # Set page configuration
 st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
-# Initialize score in session
+# Initialize score and high score in session
 if 'score' not in st.session_state:
     st.session_state.score = 0
+if 'high_score' not in st.session_state:
+    st.session_state.high_score = 0
+
+# Initialize pygame mixer for sound effects
+pygame.mixer.init()
 
 # Custom CSS for animations and styles
 st.markdown("""
@@ -75,20 +83,38 @@ def preprocess(image):
     image = image.reshape(1, 28, 28, 1)
     return image
 
-# Reward animation
+# Reward animation with sound effects
 def reward_animation(predicted_digit):
     st.session_state.score += 1
     st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
     st.markdown('<div class="celebrate">🎉 Woohoo! Great job! 🎉</div>', unsafe_allow_html=True)
 
+    # Play success sound
+    pygame.mixer.music.load('success_sound.mp3')  # Make sure you have this file in your directory
+    pygame.mixer.music.play()
+
     # Simulate multiple balloons by repeating GIFs
     for _ in range(3):  # Adjust 1–5 for "amount of balloons"
         st.image("https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif", width=200)
+
+    # Update high score
+    if st.session_state.score > st.session_state.high_score:
+        st.session_state.high_score = st.session_state.score
+
+# Timer challenge
+def countdown_timer(duration):
+    start_time = time.time()
+    while time.time() - start_time < duration:
+        remaining_time = int(duration - (time.time() - start_time))
+        st.text(f"⏳ Time Left: {remaining_time} seconds")
+        time.sleep(1)
+        st.experimental_rerun()
 
 # Title & Description
 st.title("🧠 Handwritten Digit Recognizer")
 st.markdown("🎯 **Recognize digits (0–9) drawn or uploaded by you!**")
 st.markdown(f"🏆 **Score:** `{st.session_state.score}`")
+st.markdown(f"🥇 **High Score:** `{st.session_state.high_score}`")
 
 # Reset button
 if st.button("🔄 Reset Score"):
@@ -113,6 +139,8 @@ if option == "🖌️ Draw Digit":
     )
 
     if st.button("🔍 Predict from Drawing"):
+        countdown_timer(10)  # Set timer to 10 seconds
+
         if canvas_result.image_data is not None:
             img = Image.fromarray((canvas_result.image_data[:, :, 0]).astype('uint8'))
             processed = preprocess(img)
@@ -128,6 +156,8 @@ elif option == "📁 Upload Image":
         st.image(image, caption="🖼️ Uploaded Image", width=150)
 
         if st.button("🔍 Predict from Upload"):
+            countdown_timer(10)  # Set timer to 10 seconds
+
             processed = preprocess(image)
             prediction = model.predict(processed)
             predicted_digit = np.argmax(prediction)
