@@ -5,7 +5,7 @@ import tensorflow as tf
 from streamlit_drawable_canvas import st_canvas
 
 # Set page configuration
-st.set_page_config(page_title="Hand Written Digit Recognizer", layout="centered")
+st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
 # Load model
 @st.cache_resource
@@ -23,13 +23,14 @@ def preprocess(image):
     return image
 
 # Title
-st.title("Hand Written Digit Recognizer")
+st.title("🧠 Handwritten Digit Recognizer")
+st.markdown("🎯 **Recognize digits (0–9) drawn or uploaded by you!**")
 
 # Option to draw or upload
-option = st.radio("Choose input method:", ["Draw Digit", "Upload Image"])
+option = st.radio("✍️ Choose input method:", ["🖌️ Draw Digit", "📁 Upload Image"])
 
-if option == "Draw Digit":
-    st.markdown("Draw a digit (0-9) below:")
+if option == "🖌️ Draw Digit":
+    st.markdown("🎨 **Draw a digit (0-9) below:**")
 
     canvas_result = st_canvas(
         fill_color="white",
@@ -42,21 +43,21 @@ if option == "Draw Digit":
         key="canvas",
     )
 
-    if st.button("Predict from Drawing"):
+    if st.button("🔍 Predict from Drawing"):
         if canvas_result.image_data is not None:
             img = Image.fromarray((canvas_result.image_data[:, :, 0]).astype('uint8'))
             processed = preprocess(img)
             prediction = model.predict(processed)
-            st.success(f"Predicted Digit: {np.argmax(prediction)}")
+            st.success(f"✅ **Predicted Digit:** `{np.argmax(prediction)}` 🔢")
 
-elif option == "Upload Image":
-    uploaded_file = st.file_uploader("Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
+elif option == "📁 Upload Image":
+    uploaded_file = st.file_uploader("📤 Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
     
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", width=150)
+        st.image(image, caption="🖼️ Uploaded Image", width=150)
 
-        if st.button("Predict from Upload"):
+        if st.button("🔍 Predict from Upload"):
             processed = preprocess(image)
             prediction = model.predict(processed)
-            st.success(f"Predicted Digit: {np.argmax(prediction)}")
+            st.success(f"✅ **Predicted Digit:** `{np.argmax(prediction)}` 🔢")
