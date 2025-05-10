@@ -11,7 +11,7 @@ st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="cente
 if 'score' not in st.session_state:
     st.session_state.score = 0
 
-# Custom CSS for animations and styles
+# Custom CSS for styles and static background
 st.markdown("""
     <style>
     body {
@@ -21,14 +21,7 @@ st.markdown("""
 
     .stApp {
         background: linear-gradient(270deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #84fab0, #8fd3f4, #a6c1ee, #d4fc79);
-        background-size: 1600% 1600%;
-        animation: gradientShift 30s ease infinite;
-    }
-
-    @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+        background-size: cover;
     }
 
     h1 {
@@ -36,14 +29,7 @@ st.markdown("""
         background: linear-gradient(to right, #f12711, #f5af19);
         -webkit-background-clip: text;
         font-size: 3em;
-        animation: pulse 2s infinite;
         text-align: center;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
     }
 
     .celebrate {
