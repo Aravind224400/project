@@ -11,7 +11,7 @@ st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="cente
 if 'score' not in st.session_state:
     st.session_state.score = 0
 
-# Custom CSS to set the provided aesthetic background image with pure white text
+# Custom CSS to set the provided aesthetic background image with pure white text and black info text
 st.markdown("""
     <style>
     body {
@@ -35,7 +35,8 @@ st.markdown("""
         font-size: 3em;
         text-align: center;
         font-weight: bold;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        /* Remove box around title */
+        background-color: transparent;
         padding: 10px;
         border-radius: 10px;
     }
@@ -47,6 +48,11 @@ st.markdown("""
 
     .stRadio input[type=radio], .stButton, .stFileUploader input[type="file"] {
         color: white !important;
+    }
+
+    /* Custom styling for info text (to make it black) */
+    .stInfo {
+        color: black !important;
     }
 
     .celebrate {
@@ -98,40 +104,4 @@ if st.button("🔄 Reset Score"):
     st.session_state.score = 0
     st.info("🔁 Score has been reset!")
 
-# Choose input method
-option = st.radio("✍️ Choose input method:", ["🖌️ Draw Digit", "📁 Upload Image"])
-
-if option == "🖌️ Draw Digit":
-    st.markdown("🎨 **Draw a digit (0-9) below:**")
-
-    canvas_result = st_canvas(
-        fill_color="white",
-        stroke_width=10,
-        stroke_color="black",
-        background_color="white",
-        height=280,
-        width=280,
-        drawing_mode="freedraw",
-        key="canvas"
-    )
-
-    if st.button("🔍 Predict from Drawing"):
-        if canvas_result.image_data is not None:
-            img = Image.fromarray((canvas_result.image_data[:, :, 0]).astype('uint8'))
-            processed = preprocess(img)
-            prediction = model.predict(processed)
-            predicted_digit = np.argmax(prediction)
-            reward_animation(predicted_digit)
-
-elif option == "📁 Upload Image":
-    uploaded_file = st.file_uploader("📤 Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
-    
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="🖼️ Uploaded Image", width=150)
-
-        if st.button("🔍 Predict from Upload"):
-            processed = preprocess(image)
-            prediction = model.predict(processed)
-            predicted_digit = np.argmax(prediction)
-            reward_animation(predicted_digit)
+#
