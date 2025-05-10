@@ -7,17 +7,30 @@ from streamlit_drawable_canvas import st_canvas
 # Set page configuration
 st.set_page_config(page_title="🧠 Handwritten Digit Recognizer", layout="centered")
 
-# Custom CSS for animations and background
+# Initialize score in session
+if 'score' not in st.session_state:
+    st.session_state.score = 0
+
+# Custom CSS for animations and styles
 st.markdown("""
     <style>
     body {
-        background: linear-gradient(to right, #74ebd5, #ACB6E5);
+        margin: 0;
+        padding: 0;
     }
+
     .stApp {
-        background-image: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
-        background-attachment: fixed;
-        background-size: cover;
+        background: linear-gradient(270deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #84fab0, #8fd3f4, #a6c1ee, #d4fc79);
+        background-size: 1600% 1600%;
+        animation: gradientShift 30s ease infinite;
     }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
     h1 {
         color: transparent;
         background: linear-gradient(to right, #f12711, #f5af19);
@@ -26,17 +39,20 @@ st.markdown("""
         animation: pulse 2s infinite;
         text-align: center;
     }
+
     @keyframes pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.05); }
         100% { transform: scale(1); }
     }
+
     .celebrate {
         text-align: center;
         font-size: 2em;
         color: #ff4081;
         animation: pop 0.6s ease-in-out;
     }
+
     @keyframes pop {
         0% { transform: scale(0.5); opacity: 0; }
         100% { transform: scale(1.2); opacity: 1; }
@@ -59,11 +75,27 @@ def preprocess(image):
     image = image.reshape(1, 28, 28, 1)
     return image
 
-# Title with animated gradient
+# Reward animation
+def reward_animation(predicted_digit):
+    st.session_state.score += 1
+    st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
+    st.markdown('<div class="celebrate">🎉 Woohoo! Great job! 🎉</div>', unsafe_allow_html=True)
+
+    # Simulate multiple balloons by repeating GIFs
+    for _ in range(3):  # Adjust 1–5 for "amount of balloons"
+        st.image("https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif", width=200)
+
+# Title & Description
 st.title("🧠 Handwritten Digit Recognizer")
 st.markdown("🎯 **Recognize digits (0–9) drawn or uploaded by you!**")
+st.markdown(f"🏆 **Score:** `{st.session_state.score}`")
 
-# Input method selector
+# Reset button
+if st.button("🔄 Reset Score"):
+    st.session_state.score = 0
+    st.info("🔁 Score has been reset!")
+
+# Choose input method
 option = st.radio("✍️ Choose input method:", ["🖌️ Draw Digit", "📁 Upload Image"])
 
 if option == "🖌️ Draw Digit":
@@ -77,7 +109,7 @@ if option == "🖌️ Draw Digit":
         height=280,
         width=280,
         drawing_mode="freedraw",
-        key="canvas",
+        key="canvas"
     )
 
     if st.button("🔍 Predict from Drawing"):
@@ -86,15 +118,7 @@ if option == "🖌️ Draw Digit":
             processed = preprocess(img)
             prediction = model.predict(processed)
             predicted_digit = np.argmax(prediction)
-
-            st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
-            st.balloons()
-
-            # Celebratory text
-            st.markdown('<div class="celebrate">🎉 Woohoo! Great job! 🎉</div>', unsafe_allow_html=True)
-
-            # Confetti GIF
-            st.image("https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif", width=250)
+            reward_animation(predicted_digit)
 
 elif option == "📁 Upload Image":
     uploaded_file = st.file_uploader("📤 Upload an image of a digit (ideally 28x28 or larger)", type=["png", "jpg", "jpeg"])
@@ -107,9 +131,4 @@ elif option == "📁 Upload Image":
             processed = preprocess(image)
             prediction = model.predict(processed)
             predicted_digit = np.argmax(prediction)
-
-            st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
-            st.balloons()
-
-            st.markdown('<div class="celebrate">🎊 You nailed it! 🎊</div>', unsafe_allow_html=True)
-            st.image("https://media.giphy.com/media/xT0Gqz3vGq7LiknyGg/giphy.gif", width=250)
+            reward_animation(predicted_digit)
