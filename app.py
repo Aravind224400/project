@@ -68,7 +68,7 @@ def preprocess(image):
 def reward_animation(predicted_digit):
     st.session_state.score += 1
     st.success(f"✅ **Predicted Digit:** `{predicted_digit}` 🔢")
-    st.markdown('<div class="celebrate">🎉 Woohoo! Great job! 🎉</div>', unsafe_allow_html=True)
+    st.markdown('<div class="celebrate">🎉 Wow Great 🥳</div>', unsafe_allow_html=True)
 
     # Simulate multiple balloons by repeating GIFs
     for _ in range(3):  # Adjust 1–5 for "amount of balloons"
